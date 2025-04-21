@@ -76,7 +76,7 @@ export default {
   async create(req: Request, res: Response): Promise<void> {
     try {
       const goodData: IGood = req.body;
-      
+
       // Валидация данных
       if (!goodData.CHECK_ID || !goodData.NAME || goodData.PRICE === undefined || goodData.QUANTITY === undefined) {
         res.status(400).json({ message: 'Не все обязательные поля заполнены' });
@@ -105,7 +105,7 @@ export default {
       }
 
       const goodData: IGood = req.body;
-      
+
       // Валидация данных
       if (!goodData.CHECK_ID || !goodData.NAME || goodData.PRICE === undefined || goodData.QUANTITY === undefined) {
         res.status(400).json({ message: 'Не все обязательные поля заполнены' });
@@ -192,7 +192,7 @@ export default {
   async bulkCreate(req: Request, res: Response): Promise<void> {
     try {
       const goodsData: IGood[] = req.body;
-      
+
       // Валидация данных
       if (!Array.isArray(goodsData) || goodsData.length === 0) {
         res.status(400).json({ message: 'Не передан массив товаров' });
@@ -212,5 +212,26 @@ export default {
       console.error('Ошибка при массовом создании товаров:', error);
       res.status(500).json({ message: 'Ошибка сервера при массовом создании товаров' });
     }
+  },
+
+  /**
+   * Получить все товары поездки
+   * @param {Request} req - HTTP запрос с параметром tripId
+   * @param {Response} res - HTTP ответ
+   */
+  async getByTripId(req: Request, res: Response): Promise<void> {
+    try {
+      const tripId = parseInt(req.params.tripId);
+      if (isNaN(tripId)) {
+        res.status(400).json({ message: 'Неверный формат ID поездки' });
+        return;
+      }
+
+      const goods = await Good.getByTripId(tripId);
+      res.status(200).json(goods);
+    } catch (error) {
+      console.error(`Ошибка при получении товаров поездки:`, error);
+      res.status(500).json({ message: 'Ошибка сервера при получении товаров поездки' });
+    }
   }
-}; 
+};

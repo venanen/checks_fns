@@ -1,5 +1,6 @@
 import { Pool } from 'mysql2/promise';
 import { pool as database } from '../config/database';
+import Check from './Check';
 
 // Интерфейс для объекта товара
 export interface IGood {
@@ -125,11 +126,11 @@ class Good {
    */
   async getTotalByCheck(checkId: number): Promise<number> {
     try {
-      const [rows] = await this.db.query(
+      const [rows] = await this.db.query<any[]>(
         'SELECT SUM(PRICE * QUANTITY) as total FROM goods WHERE CHECK_ID = ?',
         [checkId]
       );
-      return rows[0].total || 0;
+      return (rows[0]?.total as number) || 0;
     } catch (error) {
       console.error(`Ошибка при получении общей стоимости товаров чека ${checkId}:`, error);
       throw error;
@@ -154,6 +155,32 @@ class Good {
       throw error;
     }
   }
+
+  /**
+   * Получить все товары по ID поездки
+   * @param {number} tripId - ID поездки
+   * @returns {Promise<IGood[]>} Список товаров поездки
+   */
+  async getByTripId(tripId: number): Promise<IGood[]> {
+    try {
+      // Получаем все чеки поездки
+      const checks = await Check.getByTripId(tripId);
+
+      if (checks.length === 0) {
+        return [];
+      }
+
+      // Получаем все товары для каждого чека
+      const goodsPromises = checks.map(check => this.getByCheckId(check.CHECK_ID!));
+      const goodsArrays = await Promise.all(goodsPromises);
+
+      // Объединяем все массивы товаров в один
+      return goodsArrays.flat();
+    } catch (error) {
+      console.error(`Ошибка при получении товаров поездки с ID ${tripId}:`, error);
+      throw error;
+    }
+  }
 }
 
-export default new Good(); 
+export default new Good();

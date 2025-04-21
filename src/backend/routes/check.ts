@@ -1,5 +1,6 @@
 import express from 'express';
 import checkController from '../controllers/checkController';
+import { authenticate } from '../middlewares/auth';
 
 const router = express.Router();
 
@@ -36,21 +37,21 @@ router.get('/user/:userId', checkController.getByUserId);
  * @desc Создать новый чек
  * @access Private
  */
-router.post('/', checkController.create);
+router.post('/', authenticate, checkController.create);
 
 /**
  * @route PUT /api/check/:id
  * @desc Обновить чек
  * @access Private
  */
-router.put('/:id', checkController.update);
+router.put('/:id', authenticate, checkController.update);
 
 /**
  * @route DELETE /api/check/:id
  * @desc Удалить чек
  * @access Private
  */
-router.delete('/:id', checkController.delete);
+router.delete('/:id', authenticate, checkController.delete);
 
 /**
  * @route GET /api/check/trip/:tripId/total
@@ -59,4 +60,4 @@ router.delete('/:id', checkController.delete);
  */
 router.get('/trip/:tripId/total', checkController.getTotalSumByTrip);
 
-export default router; 
+export default router;

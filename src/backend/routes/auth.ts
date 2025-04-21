@@ -1,56 +1,55 @@
-import express from "express";
-import {pool} from "../config/database";
-import {UserController} from "../controllers/userController";
-import {returnError, returnSuccess} from "../functions/responseBuilder";
-import { Request, Response, Router } from 'express';
+import express from 'express';
+import authController from '../controllers/AuthController';
 
 const router = express.Router();
-const userController = new UserController(pool);
 
-router.post('/sign-up', async (req: Request, res: Response) => {
-    const { login, password } = req.body;
+/**
+ * @route POST /api/auth/register
+ * @desc Register a new user
+ * @access Public
+ */
+router.post('/register', authController.register);
 
-    if (!login || !password) {
-        return res.status(400).send(returnError('Login and password are required'));
-    }
+/**
+ * @route POST /api/auth/login
+ * @desc Login user
+ * @access Public
+ */
+router.post('/login', authController.login);
 
-    try {
-        const isUserExist = await userController.checkIfUserExistByLogin(login);
-        if (isUserExist) return res.status(400).send(returnError('User already exist'));
+/**
+ * @route GET /api/auth/user
+ * @desc Get user by token
+ * @access Private
+ */
+router.get('/user', authController.getUserByToken);
 
-        const result = await userController.registration(login, password);
-        if (result) {
-            res.send(returnSuccess({ token: result }));
-        } else {
-            res.status(500).send(returnError('Error during registration'));
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).send(returnError('Internal server error'));
-    }
-});
+/**
+ * @route GET /api/auth/users
+ * @desc Get all users
+ * @access Private
+ */
+router.get('/users', authController.getAllUsers);
 
+/**
+ * @route GET /api/auth/users/:id
+ * @desc Get user by ID
+ * @access Private
+ */
+router.get('/users/:id', authController.getUserById);
 
-router.post('/login', async (req: Request, res: Response) => {
-    const { login, password } = req.body;
-    console.log(login, password)
+/**
+ * @route PUT /api/auth/users/:id
+ * @desc Update user
+ * @access Private
+ */
+router.put('/users/:id', authController.updateUser);
 
-    if (!login || !password) {
-        return res.status(400).send(returnError('Login and password are required'));
-    }
+/**
+ * @route DELETE /api/auth/users/:id
+ * @desc Delete user
+ * @access Private
+ */
+router.delete('/users/:id', authController.deleteUser);
 
-    try {
-        const result = await userController.login(login, password);
-        if (result) {
-            res.send(returnSuccess({ token: result }));
-        } else {
-            res.status(401).send(returnError('Invalid credentials'));
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).send(returnError('Internal server error'));
-    }
-});
-
-
-export default router
+export default router;

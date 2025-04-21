@@ -1,5 +1,6 @@
 import express from 'express';
 import tripController from '../controllers/TripController';
+import { authenticate, isOwner } from '../middlewares/auth';
 
 const router = express.Router();
 
@@ -29,35 +30,35 @@ router.get('/user/:userId', tripController.getByUserId);
  * @desc Создать новую поездку
  * @access Private
  */
-router.post('/', tripController.create);
+router.post('/', authenticate, tripController.create);
 
 /**
  * @route PUT /api/trip/:id
  * @desc Обновить поездку
  * @access Private
  */
-router.put('/:id', tripController.update);
+router.put('/:id', authenticate, isOwner, tripController.update);
 
 /**
  * @route DELETE /api/trip/:id
  * @desc Удалить поездку
  * @access Private
  */
-router.delete('/:id', tripController.delete);
+router.delete('/:id', authenticate, isOwner, tripController.delete);
 
 /**
  * @route POST /api/trip/:id/user/:userId
  * @desc Добавить пользователя в поездку
  * @access Private
  */
-router.post('/:id/user/:userId', tripController.addUser);
+router.post('/:id/user/:userId', authenticate, isOwner, tripController.addUser);
 
 /**
  * @route DELETE /api/trip/:id/user/:userId
  * @desc Удалить пользователя из поездки
  * @access Private
  */
-router.delete('/:id/user/:userId', tripController.removeUser);
+router.delete('/:id/user/:userId', authenticate, isOwner, tripController.removeUser);
 
 /**
  * @route GET /api/trip/:id/users
