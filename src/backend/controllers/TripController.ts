@@ -77,9 +77,18 @@ export default {
     try {
       const tripData: ITrip = req.body;
 
+      // Получаем USER_ID из JWT payload
+      if (!req.jwtPayload) {
+        res.status(401).json({ message: 'Требуется аутентификация' });
+        return;
+      }
+
+      // Устанавливаем USER_ID из JWT payload
+      tripData.USER_ID = req.jwtPayload.userId;
+
       // Валидация данных
-      if (!tripData.USER_ID || !tripData.NAME) {
-        res.status(400).json({ message: 'Не все обязательные поля заполнены' });
+      if (!tripData.NAME) {
+        res.status(400).json({ message: 'Название поездки обязательно' });
         return;
       }
 
@@ -104,11 +113,20 @@ export default {
         return;
       }
 
+      // Получаем USER_ID из JWT payload
+      if (!req.jwtPayload) {
+        res.status(401).json({ message: 'Требуется аутентификация' });
+        return;
+      }
+
       const tripData: ITrip = req.body;
 
+      // Устанавливаем USER_ID из JWT payload
+      tripData.USER_ID = req.jwtPayload.userId;
+
       // Валидация данных
-      if (!tripData.USER_ID || !tripData.NAME) {
-        res.status(400).json({ message: 'Не все обязательные поля заполнены' });
+      if (!tripData.NAME) {
+        res.status(400).json({ message: 'Название поездки обязательно' });
         return;
       }
 
