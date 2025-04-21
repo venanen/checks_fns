@@ -97,7 +97,7 @@ export default {
   async create(req: Request, res: Response): Promise<void> {
     try {
       const checkData: ICheck = req.body;
-      
+
       // Валидация данных
       if (!checkData.TRIP_ID || !checkData.USER_ID || checkData.CHECK_SUM === undefined) {
         res.status(400).json({ message: 'Не все обязательные поля заполнены' });
@@ -113,9 +113,9 @@ export default {
   },
 
   /**
-   * Обновить чек
-   * @param {Request} req - HTTP запрос с параметром id и данными в теле
-   * @param {Response} res - HTTP ответ
+   * Обновить чек частично или полностью
+   * @param req - Запрос Express
+   * @param res - Ответ Express
    */
   async update(req: Request, res: Response): Promise<void> {
     try {
@@ -125,11 +125,28 @@ export default {
         return;
       }
 
-      const checkData: ICheck = req.body;
-      
-      // Валидация данных
-      if (!checkData.TRIP_ID || !checkData.USER_ID || checkData.CHECK_SUM === undefined) {
-        res.status(400).json({ message: 'Не все обязательные поля заполнены' });
+      // Используем Partial<ICheck> для частичного обновления
+      const checkData: Partial<ICheck> = req.body;
+
+      // Проверка валидности предоставленных данных (если они есть)
+      if (Object.keys(checkData).length === 0) {
+        res.status(400).json({ message: 'Не предоставлены данные для обновления' });
+        return;
+      }
+
+      // Валидация отдельных полей, если они присутствуют
+      if (checkData.TRIP_ID !== undefined && typeof checkData.TRIP_ID !== 'number') {
+        res.status(400).json({ message: 'Некорректное значение TRIP_ID' });
+        return;
+      }
+
+      if (checkData.USER_ID !== undefined && typeof checkData.USER_ID !== 'number') {
+        res.status(400).json({ message: 'Некорректное значение USER_ID' });
+        return;
+      }
+
+      if (checkData.CHECK_SUM !== undefined && typeof checkData.CHECK_SUM !== 'number') {
+        res.status(400).json({ message: 'Некорректное значение CHECK_SUM' });
         return;
       }
 
@@ -204,4 +221,4 @@ export default {
       res.status(500).json({ message: 'Ошибка сервера при получении общей суммы чеков' });
     }
   }
-}; 
+};

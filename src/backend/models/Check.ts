@@ -99,17 +99,43 @@ class Check {
   }
 
   /**
-   * Обновить чек
+   * Обновить чек частично
    * @param {number} id - ID чека
-   * @param {ICheck} check - Новые данные чека
+   * @param {Partial<ICheck>} check - Частичные данные чека для обновления
    * @returns {Promise<boolean>} Успешность обновления
    */
-  async update(id: number, check: ICheck): Promise<boolean> {
+  async update(id: number, check: Partial<ICheck>): Promise<boolean> {
     try {
-      const [result] = await this.db.query(
-        'UPDATE trip_checks SET TRIP_ID = ?, USER_ID = ?, CHECK_SUM = ? WHERE CHECK_ID = ?',
-        [check.TRIP_ID, check.USER_ID, check.CHECK_SUM, id]
-      );
+      // Проверка наличия полей для обновления
+      const updateFields: string[] = [];
+      const values: any[] = [];
+
+      if (check.TRIP_ID !== undefined) {
+        updateFields.push('TRIP_ID = ?');
+        values.push(check.TRIP_ID);
+      }
+
+      if (check.USER_ID !== undefined) {
+        updateFields.push('USER_ID = ?');
+        values.push(check.USER_ID);
+      }
+
+      if (check.CHECK_SUM !== undefined) {
+        updateFields.push('CHECK_SUM = ?');
+        values.push(check.CHECK_SUM);
+      }
+
+      // Если нет полей для обновления, возвращаем true (нечего обновлять)
+      if (updateFields.length === 0) {
+        return true;
+      }
+
+      // Добавляем ID в конец массива значений
+      values.push(id);
+
+      const query = `UPDATE trip_checks SET ${updateFields.join(', ')} WHERE CHECK_ID = ?`;
+      const [result] = await this.db.query(query, values);
+
       return (result as any).affectedRows > 0;
     } catch (error) {
       console.error(`Ошибка при обновлении чека с ID ${id}:`, error);
@@ -124,6 +150,10 @@ class Check {
    */
   async delete(id: number): Promise<boolean> {
     try {
+      // First delete all goods associated with this check
+      await this.db.query('DELETE FROM goods WHERE CHECK_ID = ?', [id]);
+
+      // Then delete the check itself
       const [result] = await this.db.query('DELETE FROM trip_checks WHERE CHECK_ID = ?', [id]);
       return (result as any).affectedRows > 0;
     } catch (error) {
@@ -139,11 +169,11 @@ class Check {
    */
   async getTotalSumByTrip(tripId: number): Promise<number> {
     try {
-      const [rows] = await this.db.query(
+      const [rows] = await this.db.query<any>(
         'SELECT SUM(CHECK_SUM) as total FROM trip_checks WHERE TRIP_ID = ?',
         [tripId]
       );
-      return rows[0].total || 0;
+      return (rows[0]?.total as number) || 0;
     } catch (error) {
       console.error(`Ошибка при получении общей суммы чеков поездки ${tripId}:`, error);
       throw error;
@@ -151,4 +181,4 @@ class Check {
   }
 }
 
-export default new Check(); 
+export default new Check();

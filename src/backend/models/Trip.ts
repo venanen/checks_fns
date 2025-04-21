@@ -114,12 +114,23 @@ class Trip {
    * @returns {Promise<boolean>} Успешность удаления
    */
   async delete(id: number): Promise<boolean> {
+    const connection = await this.db.getConnection();
     try {
-      const [result] = await this.db.query('DELETE FROM trips WHERE TRIP_ID = ?', [id]);
-      return (result as any).affectedRows > 0;
+      await connection.beginTransaction();
+
+      // Execute a single SQL query that deletes the trip and all related records
+      const sql = `DELETE FROM trips WHERE TRIP_ID = ?;`;
+
+      const [result] = await connection.query(sql, [id]);
+
+      await connection.commit();
+      return true;
     } catch (error) {
+      await connection.rollback();
       console.error(`Ошибка при удалении поездки с ID ${id}:`, error);
       throw error;
+    } finally {
+      connection.release();
     }
   }
 
@@ -181,4 +192,4 @@ class Trip {
   }
 }
 
-export default new Trip(); 
+export default new Trip();

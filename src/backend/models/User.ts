@@ -274,12 +274,23 @@ class User {
    * @returns {Promise<boolean>} Success of deletion
    */
   async delete(id: number): Promise<boolean> {
+    const connection = await this.db.getConnection();
     try {
-      const [result] = await this.db.query('DELETE FROM users WHERE USER_ID = ?', [id]);
-      return (result as any).affectedRows > 0;
+      await connection.beginTransaction();
+
+      // Execute a single SQL query that deletes the user and all related records
+      const sql = `DELETE FROM users WHERE USER_ID = ?`;
+
+      const [result] = await connection.query(sql, [id]);
+
+      await connection.commit();
+      return true;
     } catch (error) {
+      await connection.rollback();
       console.error(`Error deleting user with ID ${id}:`, error);
       throw error;
+    } finally {
+      connection.release();
     }
   }
 }

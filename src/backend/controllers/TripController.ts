@@ -93,6 +93,7 @@ export default {
       }
 
       const newTrip = await Trip.create(tripData);
+      const tripUser = await Trip.addUser(newTrip.TRIP_ID as number, tripData.USER_ID)
       res.status(201).json(newTrip);
     } catch (error) {
       console.error('Ошибка при создании поездки:', error);
