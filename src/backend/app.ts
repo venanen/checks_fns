@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const host = '127.0.0.1';
+const host = '0.0.0.0';
 const port = 7000;
 
 app.use('/api', routes);
@@ -16,5 +16,3 @@ app.get('/', (req, res) => {
 app.listen(port, host, () =>
     console.log(`Server listens http://${host}:${port}`)
 );
-
-

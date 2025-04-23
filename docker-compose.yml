@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Сервис для Node.js приложения
+  app:
+    build: .
+    ports:
+      - "7000:7000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=3273250zZ!
+      - DB_PORT=3306
+      - DB_NAME=checks_fns
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # Сервис для MySQL базы данных
+  db:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=3273250zZ!
+      - MYSQL_DATABASE=checks_fns
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
+
+# Комментарий: Docker Compose файл для запуска приложения и базы данных
+# Приложение будет доступно на порту 7000
+# База данных MySQL будет доступна на порту 3306
+# Данные MySQL сохраняются в именованном томе mysql-data
+# Инициализация базы данных происходит из файла init.sql

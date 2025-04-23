@@ -6,8 +6,9 @@
   "scripts": {
     "test": "jest",
     "test:e2e": "jest src/backend/tests/e2e/userTripCheckFlow.test.ts",
-    "start": "node dist/index.js",
-    "dev": "npx tsx src/backend/app.ts"
+    "start": "node dist/backend/app.js",
+    "dev": "npx tsx src/backend/app.ts",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
