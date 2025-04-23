@@ -92,6 +92,36 @@ export default {
   },
 
   /**
+   * Массовое создание товаров
+   * @param {Request} req - HTTP запрос с массивом товаров в теле
+   * @param {Response} res - HTTP ответ
+   */
+  async bulkCreate(req: Request, res: Response): Promise<void> {
+    try {
+      const goodsData: IGood[] = req.body;
+
+      if (!Array.isArray(goodsData) || goodsData.length === 0) {
+        res.status(400).json({ message: 'Необходимо предоставить массив товаров' });
+        return;
+      }
+
+      // Валидация данных
+      for (const good of goodsData) {
+        if (!good.CHECK_ID || !good.NAME || good.PRICE === undefined || good.QUANTITY === undefined) {
+          res.status(400).json({ message: 'Не все обязательные поля заполнены для всех товаров' });
+          return;
+        }
+      }
+
+      const newGoods = await Good.bulkCreate(goodsData);
+      res.status(201).json(newGoods);
+    } catch (error) {
+      console.error('Ошибка при массовом создании товаров:', error);
+      res.status(500).json({ message: 'Ошибка сервера при массовом создании товаров' });
+    }
+  },
+
+  /**
    * Обновить товар
    * @param {Request} req - HTTP запрос с параметром id и данными в теле
    * @param {Response} res - HTTP ответ
@@ -181,36 +211,6 @@ export default {
     } catch (error) {
       console.error(`Ошибка при получении общей стоимости товаров чека:`, error);
       res.status(500).json({ message: 'Ошибка сервера при получении общей стоимости товаров' });
-    }
-  },
-
-  /**
-   * Массовое создание товаров
-   * @param {Request} req - HTTP запрос с массивом товаров в теле
-   * @param {Response} res - HTTP ответ
-   */
-  async bulkCreate(req: Request, res: Response): Promise<void> {
-    try {
-      const goodsData: IGood[] = req.body;
-
-      // Валидация данных
-      if (!Array.isArray(goodsData) || goodsData.length === 0) {
-        res.status(400).json({ message: 'Не передан массив товаров' });
-        return;
-      }
-
-      for (const good of goodsData) {
-        if (!good.CHECK_ID || !good.NAME || good.PRICE === undefined || good.QUANTITY === undefined) {
-          res.status(400).json({ message: 'Не все обязательные поля заполнены в одном из товаров' });
-          return;
-        }
-      }
-
-      const createdGoods = await Good.bulkCreate(goodsData);
-      res.status(201).json(createdGoods);
-    } catch (error) {
-      console.error('Ошибка при массовом создании товаров:', error);
-      res.status(500).json({ message: 'Ошибка сервера при массовом создании товаров' });
     }
   },
 

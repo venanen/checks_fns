@@ -1,5 +1,5 @@
 import express from 'express';
-import goodController from '../controllers/goodController';
+import goodController from '../controllers/GoodController';
 import { authenticate } from '../middlewares/auth';
 
 const router = express.Router();

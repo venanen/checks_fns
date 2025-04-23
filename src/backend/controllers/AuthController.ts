@@ -2,48 +2,48 @@ import { Request, Response } from 'express';
 import User from '../models/User';
 
 /**
- * Authentication controller
- * Contains methods for user authentication and management
+ * Контроллер аутентификации
+ * Содержит методы для аутентификации и управления пользователями
  */
 export default {
   /**
-   * Register a new user
-   * @param {Request} req - HTTP request with login and password in body
-   * @param {Response} res - HTTP response
+   * Регистрация нового пользователя
+   * @param {Request} req - HTTP запрос с логином и паролем в теле
+   * @param {Response} res - HTTP ответ
    */
   async register(req: Request, res: Response): Promise<void> {
     const { login, password } = req.body;
 
     if (!login || !password) {
-      res.status(400).json({ message: 'Login and password are required' });
+      res.status(400).json({ message: 'Логин и пароль обязательны' });
       return;
     }
 
     try {
       const isUserExist = await User.checkIfUserExistsByLogin(login);
       if (isUserExist) {
-        res.status(400).json({ message: 'User already exists' });
+        res.status(400).json({ message: 'Пользователь уже существует' });
         return;
       }
 
       const { accessToken, refreshToken } = await User.register(login, password);
       res.status(201).json({ accessToken, refreshToken });
     } catch (error) {
-      console.error('Error during user registration:', error);
-      res.status(500).json({ message: 'Server error during registration' });
+      console.error('Ошибка при регистрации пользователя:', error);
+      res.status(500).json({ message: 'Ошибка сервера при регистрации' });
     }
   },
 
   /**
-   * Login user
-   * @param {Request} req - HTTP request with login and password in body
-   * @param {Response} res - HTTP response
+   * Вход пользователя
+   * @param {Request} req - HTTP запрос с логином и паролем в теле
+   * @param {Response} res - HTTP ответ
    */
   async login(req: Request, res: Response): Promise<void> {
     const { login, password } = req.body;
 
     if (!login || !password) {
-      res.status(400).json({ message: 'Login and password are required' });
+      res.status(400).json({ message: 'Логин и пароль обязательны' });
       return;
     }
 
@@ -55,24 +55,24 @@ export default {
           refreshToken: tokens.refreshToken
         });
       } else {
-        res.status(401).json({ message: 'Invalid credentials' });
+        res.status(401).json({ message: 'Неверные учетные данные' });
       }
     } catch (error) {
-      console.error('Error during user login:', error);
-      res.status(500).json({ message: 'Server error during login' });
+      console.error('Ошибка при входе пользователя:', error);
+      res.status(500).json({ message: 'Ошибка сервера при входе' });
     }
   },
 
   /**
-   * Get user by JWT token
-   * @param {Request} req - HTTP request with JWT token in body or headers
-   * @param {Response} res - HTTP response
+   * Получить пользователя по JWT токену
+   * @param {Request} req - HTTP запрос с JWT токеном в теле или заголовках
+   * @param {Response} res - HTTP ответ
    */
   async getUserByToken(req: Request, res: Response): Promise<void> {
     const token = req.body.accessToken || req.headers.authorization?.split(' ')[1];
 
     if (!token) {
-      res.status(400).json({ message: 'JWT token is required' });
+      res.status(400).json({ message: 'JWT токен обязателен' });
       return;
     }
 
@@ -83,18 +83,18 @@ export default {
         const { password, ...userWithoutPassword } = user;
         res.status(200).json(userWithoutPassword);
       } else {
-        res.status(404).json({ message: 'User not found or token invalid' });
+        res.status(404).json({ message: 'Пользователь не найден или токен недействителен' });
       }
     } catch (error) {
-      console.error('Error getting user by JWT token:', error);
-      res.status(500).json({ message: 'Server error getting user' });
+      console.error('Ошибка при получении пользователя по JWT токену:', error);
+      res.status(500).json({ message: 'Ошибка сервера при получении пользователя' });
     }
   },
 
   /**
-   * Get all users
-   * @param {Request} req - HTTP request
-   * @param {Response} res - HTTP response
+   * Получить всех пользователей
+   * @param {Request} req - HTTP запрос
+   * @param {Response} res - HTTP ответ
    */
   async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
@@ -103,15 +103,15 @@ export default {
       const usersWithoutPasswords = users.map(({ password, ...user }) => user);
       res.status(200).json(usersWithoutPasswords);
     } catch (error) {
-      console.error('Error getting all users:', error);
-      res.status(500).json({ message: 'Server error getting users' });
+      console.error('Ошибка при получении всех пользователей:', error);
+      res.status(500).json({ message: 'Ошибка сервера при получении пользователей' });
     }
   },
 
   /**
-   * Get user by ID
-   * @param {Request} req - HTTP request with id parameter
-   * @param {Response} res - HTTP response
+   * Получить пользователя по ID
+   * @param {Request} req - HTTP запрос с параметром id
+   * @param {Response} res - HTTP ответ
    */
   async getUserById(req: Request, res: Response): Promise<void> {
     try {
@@ -137,9 +137,9 @@ export default {
   },
 
   /**
-   * Update user
-   * @param {Request} req - HTTP request with id parameter and user data in body
-   * @param {Response} res - HTTP response
+   * Обновить пользователя
+   * @param {Request} req - HTTP запрос с параметром id и данными пользователя в теле
+   * @param {Response} res - HTTP ответ
    */
   async updateUser(req: Request, res: Response): Promise<void> {
     try {
@@ -168,9 +168,9 @@ export default {
   },
 
   /**
-   * Delete user
-   * @param {Request} req - HTTP request with id parameter
-   * @param {Response} res - HTTP response
+   * Удалить пользователя
+   * @param {Request} req - HTTP запрос с параметром id
+   * @param {Response} res - HTTP ответ
    */
   async deleteUser(req: Request, res: Response): Promise<void> {
     try {
