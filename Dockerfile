@@ -10,15 +10,13 @@ RUN npm install
 
 # Копирование исходного кода
 COPY . .
-
+# Открытие порта, на котором работает приложение
+EXPOSE 7000
 # Компиляция TypeScript в JavaScript
 RUN npm run build || (mkdir -p dist && npx tsc)
 
-# Открытие порта, на котором работает приложение
-EXPOSE 7000
 
-# Запуск приложения
-CMD ["npm", "start"]
+
 
 # Комментарий: Dockerfile для Node.js приложения с TypeScript
 # Используется образ node:20-alpine для минимального размера

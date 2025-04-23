@@ -1,6 +1,5 @@
 import express from "express";
 import routes from "./routes";
-import passport from "./config/passport";
 
 const app = express();
 app.use(express.json());
