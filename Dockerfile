@@ -15,7 +15,8 @@ EXPOSE 7000
 # Компиляция TypeScript в JavaScript
 RUN npm run build || (mkdir -p dist && npx tsc)
 
-
+# Запуск приложения
+CMD ["npm", "start"]
 
 
 # Комментарий: Dockerfile для Node.js приложения с TypeScript
